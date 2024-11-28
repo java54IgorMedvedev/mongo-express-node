@@ -12,37 +12,27 @@ app.post("/mflix/comments", async (req, res) => {
     res.status(201).end(JSON.stringify(commentDB));
 });
 app.put("/mflix/comments", async (req, res) => {
-   try {
-       const updatedComment = await mflixService.updateComment(req.body);
-       res.status(200).json(updatedComment);
-   } catch (error) {
-       res.status(400).json({ error: error.message });
-   }
+    //update comment
+    //req.body {"commentId":<string>, "text":<string>}
+    const commentUpdated = await mflixService.updateCommentText(req.body);
+    res.status(200).end(JSON.stringify(commentUpdated));
 });
-
 app.delete("/mflix/comments/:id", async (req, res) => {
-   try {
-       await mflixService.deleteComment(req.params.id);
-       res.status(204).end();
-   } catch (error) {
-       res.status(400).json({ error: error.message });
-   }
-});
-
+    // delete comment
+   // req.params.id - comment to delete
+   const deletedComment = await mflixService.deleteComment(req.params.id);
+   res.status(200).end(JSON.stringify(deletedComment));
+})
 app.get("/mflix/comments/:id", async (req, res) => {
-   try {
-       const comment = await mflixService.getComment(req.params.id);
-       res.status(200).json(comment);
-   } catch (error) {
-       res.status(404).json({ error: error.message });
-   }
-});
-
+    //get comment
+   // req.params.id - comment to get
+   const comment = await mflixService.getComment(req.params.id);
+   res.status(200).end(JSON.stringify(comment));
+})
 app.post("/mflix/movies/rated", async (req, res) => {
-   try {
-       const movies = await mflixService.findRatedMovies(req.body);
-       res.status(200).json(movies);
-   } catch (error) {
-       res.status(400).json({ error: error.message });
-   }
-});
+    //find most imdb rated movies
+   // req.body {"year":<number>(optional), "genre":<string>(optional),
+   // "acter":<string-regex>(optional), "amount":<number>(mandatary)}
+   const movies = await mflixService.getMostRatedMovies(req.body);
+   res.status(200).end(JSON.stringify(movies));
+})
