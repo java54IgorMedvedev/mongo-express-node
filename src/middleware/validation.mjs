@@ -3,17 +3,10 @@ export default function validate(schemas) {
         const schema = schemas[req.path]?.[req.method];
         if (schema) {
             const { error } = schema.validate(req.body);
-            if (error) {
-                req.validated = false;
-                req.error_message = error.details[0]?.message || "Validation error";
-                console.error('Validation failed:', req.error_message);
-            } else {
-                req.validated = true;
-                req.error_message = null;
-            }
-        } else {
             req.validated = true;
-            req.error_message = null;
+            req.error_message = error?.details?.[0]?.message || null;
+        } else {
+            req.validated = false;
         }
         next();
     };
