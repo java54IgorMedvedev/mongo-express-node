@@ -28,7 +28,10 @@ export default class MflixService {
         return commentUpdated;
     }
     async deleteComment(id) {
-        const toDeleteComment = await this.getComment(id)
+        const toDeleteComment = await this.getComment(id);
+        if(!toDeleteComment){
+            throw {code: 404, text: "comment not found"};
+        }
         await this.#commentsCollection.deleteOne({"_id":toDeleteComment._id});
         return toDeleteComment;
     }
