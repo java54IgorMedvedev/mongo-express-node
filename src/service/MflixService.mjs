@@ -1,3 +1,4 @@
+import { getError } from '../errors/error.mjs'
 import MongoConnection from '../mongo/MongoConnection.mjs'
 import { ObjectId } from 'mongodb'
 export default class MflixService {
@@ -16,6 +17,10 @@ export default class MflixService {
     async addComment(commentDto) {
 
         const commentDB = this.#toComment(commentDto);
+        const movie = await this.#moviesCollection.findOne({_id: commentDB.movie_id});
+        if(!movie) {
+            throw getError(404, `movie with ObjectId ${commentDB.movie_id} doesn't exist`)
+        }
         const result = await this.#commentsCollection.insertOne(commentDB);
         commentDB._id = result.insertedId;
         return commentDB;
@@ -25,19 +30,22 @@ export default class MflixService {
             { _id: ObjectId.createFromHexString(commentId) },
             { $set: { text } },
             { returnNewDocument: true });
+        if (!commentUpdated)  {
+            throw getError(404, `comment with ObjectId ${commentId} not found`);
+        }  
         return commentUpdated;
     }
     async deleteComment(id) {
         const toDeleteComment = await this.getComment(id);
-        if(!toDeleteComment){
-            throw {code: 404, text: "comment not found"};
-        }
         await this.#commentsCollection.deleteOne({"_id":toDeleteComment._id});
         return toDeleteComment;
     }
     async getComment(id) {
         const mongoId = ObjectId.createFromHexString(id);
         const comment = await this.#commentsCollection.findOne({"_id":mongoId});
+        if(!comment) {
+            throw getError(404, "Comment not found");
+        }
         return comment;
     }
     async getMostRatedMovies({genre, acter, year, amount}) {
