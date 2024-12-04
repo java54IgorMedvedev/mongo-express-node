@@ -3,6 +3,11 @@ import { ADD_ACCOUNT, ADD_UPDATE_COMMENT, DELETE_GET_COMMENT, GET_MOVIES_RATED }
 
 export const schemaObjectId = Joi.string().hex().length(24).required();
 
+export const schemaUpdatePassword = Joi.object({
+    password: Joi.string().min(8).required()
+});
+
+
 export const schemaCommentUpdate = Joi.object({
     commentId: schemaObjectId,
     text: Joi.string().required()

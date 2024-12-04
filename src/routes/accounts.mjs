@@ -1,28 +1,22 @@
 import express from 'express';
-import asyncHandler from 'express-async-handler';
-import AccountsService from '../service/AccountsService.mjs';
-import { validateBody } from '../middleware/validation.mjs';
-import schemas from '../validation-schemas/schemas.mjs';
+import { AccountService } from '../services/accounts-service.mjs';
 
-const accountsService = new AccountsService(process.env.MONGO_URI, process.env.DB_NAME);
 export const accounts_route = express.Router();
 
-accounts_route.post("/account", asyncHandler(async (req, res) => {
-    const result = await accountsService.insertAccount(req.body);
-    res.status(201).json(result);
-}));
+accounts_route.put('/update-password/:id', async (req, res, next) => {
+  try {
+    const updatedAccount = await AccountService.updatePassword(req.params.id, req.body.password);
+    res.status(200).json(updatedAccount);
+  } catch (err) {
+    next(err);
+  }
+});
 
-accounts_route.put("/account/password", validateBody(schemas), asyncHandler(async (req, res) => {
-    const result = await accountsService.updatePassword(req.body);
-    res.status(200).json(result);
-}));
-
-accounts_route.get("/account/:username", asyncHandler(async (req, res) => {
-    const result = await accountsService.getAccount(req.params.username);
-    res.status(200).json(result);
-}));
-
-accounts_route.delete("/account/:username", asyncHandler(async (req, res) => {
-    const result = await accountsService.deleteAccount(req.params.username);
-    res.status(200).json(result);
-}));
+accounts_route.delete('/:id', async (req, res, next) => {
+  try {
+    const deletedAccount = await AccountService.deleteAccount(req.params.id);
+    res.status(200).json(deletedAccount);
+  } catch (err) {
+    next(err);
+  }
+});
