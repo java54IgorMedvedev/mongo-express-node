@@ -6,4 +6,5 @@ export const DELETE_GET_COMMENT = MFLIX_COMMENTS + "/:id";
 export const GET_MOVIES_RATED = "/mflix" + MFLIX_MOVIES_RATED;
 export const ADD_UPDATE_ACCOUNT = "/accounts" + ACCOUNTS_ACCOUNT;
 export const DELETE_GET_ACCOUNT = ACCOUNTS_ACCOUNT + "/:username";
-export const SET_ACCOUNT_ROLE = '/accounts/account/role';
+export const SET_ROLE_ACCOUNT = ADD_UPDATE_ACCOUNT + "/role";
+export const ACCOUNTS_SET_ROLE = ACCOUNTS_ACCOUNT + "/role";

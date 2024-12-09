@@ -1,7 +1,6 @@
 import { getError } from "../errors/error.mjs";
 import MongoConnection from "../mongo/MongoConnection.mjs"
 import bcrypt from 'bcrypt';
-
 export default class AccountsService {
     #accounts
     #connection
@@ -9,7 +8,6 @@ export default class AccountsService {
         this.#connection = new MongoConnection(connection_str, db_name);
         this.#accounts = this.#connection.getCollection('accounts');
     }
-
     async insertAccount(account) {
         const accountDB = await this.#accounts.findOne({ _id: account.username });
         if (accountDB) {
@@ -20,8 +18,8 @@ export default class AccountsService {
         if (result.insertedId == account.username) {
             return toInsertAccount;
         }
-    }
 
+    }
     async updatePassword({ username, newPassword }) {
         const accountUpdated = await this.#accounts.findOneAndUpdate(
             { _id: username },
@@ -32,7 +30,6 @@ export default class AccountsService {
         }
         return accountUpdated;
     }
-
     async getAccount(username) {
         const account = await this.#accounts.findOne({ _id: username });
         if (!account) {
@@ -40,41 +37,28 @@ export default class AccountsService {
         }
         return account;
     }
-
     async deleteAccount(username) {
         const account = await this.getAccount(username);
         await this.#accounts.deleteOne({ _id: username });
         return account;
     }
-
-    async setRole({ username, role }) {
-        const validRoles = ['USER', 'PREMIUM_USER', 'ADMIN'];
-        if (!validRoles.includes(role)) {
-            throw getError(400, 'Invalid role');
-        }
-
-        const account = await this.getAccount(username);
-        account.role = role;
-        await this.#accounts.updateOne({ _id: username }, { $set: { role } });
-
-        return { username, role };
+    async getTimestampCounter(username){
+      const {timestamp, counter} = await this.#accounts.findOne({_id:username}, {fields:{timestamp:1, counter:1}});
+      return {timestamp, counter} ;
     }
-
-    static authenticateSetRole(username, password) {
-        const setRoleUsername = process.env.SET_ROLE_USERNAME;
-        const setRolePassword = process.env.SET_ROLE_PASSWORD;
-
-        if (username !== setRoleUsername || password !== setRolePassword) {
-            throw getError(401, 'Unauthorized');
-        }
+    async setTimestampCounter(username, {timestamp, counter}){
+        return this.#accounts.findOneAndUpdate({_id:username},{$set:{timestamp, counter}},
+             {returnDocument:'after'});
     }
-
+    async setRole({username, role}) {
+       await this.getAccount(username);
+       return this.#accounts.findOneAndUpdate({_id: username}, {$set:{role}}, {returnDocument:"after"});
+    }
     #toAccountDB(account) {
         const accountDB = {};
         accountDB._id = account.username;
         accountDB.email = account.email;
         accountDB.hashPassword = bcrypt.hashSync(account.password, 10);
-        accountDB.role = 'USER';
         return accountDB;
     }
 }
